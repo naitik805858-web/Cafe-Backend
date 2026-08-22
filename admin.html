@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CHĪFAN PRIME ⚙️ Admin Command Center</title>
+<style>
+/* ================= SELF-CONTAINED — NO CDN, NO EXTERNAL FILES ================= */
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:#020408; --surface:#070a12; --card:rgba(10,15,24,.85);
+  --accent:#ff1e56; --neon:#00f2fe; --gold:#ffb703; --green:#34d399;
+  --txt:#f1f5f9; --mut:#94a3b8; --dim:#64748b; --line:rgba(255,255,255,.09);
+}
+html,body { background:var(--bg); color:var(--txt); font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif; min-height:100%; }
+body {
+  background-image:
+    radial-gradient(circle at 10% 10%, rgba(255,30,86,.15) 0, transparent 45%),
+    radial-gradient(circle at 90% 30%, rgba(0,242,254,.09) 0, transparent 40%),
+    radial-gradient(circle at 50% 90%, rgba(255,183,3,.07) 0, transparent 50%);
+  background-attachment:fixed;
+}
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--accent); border-radius:99px; }
+
+.card { background:var(--card); border:1px solid var(--line); border-radius:18px; }
+.pill { background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:12px; }
+
+button { font-family:inherit; cursor:pointer; border:none; color:inherit; background:none; }
+button:active { transform:scale(.96); }
+input, select, textarea {
+  width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12);
+  border-radius:10px; padding:9px 12px; color:#fff; font-size:12.5px; outline:none; font-family:inherit;
+  transition:border .2s, box-shadow .2s;
+}
+input:focus, select:focus, textarea:focus { border-color:var(--accent); box-shadow:0 0 14px rgba(255,30,86,.35); }
+select option { background:#0b0f17; }
+label.lb { font-size:10px; font-weight:700; color:var(--mut); display:block; margin:0 0 4px; text-transform:uppercase; letter-spacing:.05em; }
+
+.btn-red { background:linear-gradient(90deg,#ff1e56,#e11d48); color:#fff; font-weight:800; border-radius:12px; padding:10px 18px; font-size:12px; box-shadow:0 5px 20px rgba(255,30,86,.4); }
+.btn-blue { background:linear-gradient(90deg,#06b6d4,#2563eb); color:#fff; font-weight:800; border-radius:12px; padding:10px 18px; font-size:12px; box-shadow:0 5px 20px rgba(0,242,254,.25); }
+.btn-ghost { border:1px solid var(--line); background:rgba(255,255,255,.04); border-radius:12px; padding:9px 14px; font-size:12px; font-weight:700; color:var(--mut); }
+.btn-ghost:hover { color:#fff; border-color:rgba(255,30,86,.5); }
+.icon-btn { width:32px; height:32px; border-radius:9px; border:1px solid var(--line); background:rgba(255,255,255,.04); display:inline-flex; align-items:center; justify-content:center; font-size:13px; }
+.icon-btn.danger:hover { background:rgba(244,63,94,.18); border-color:rgba(244,63,94,.55); }
+
+/* ---------- login ---------- */
+#gate { position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:16px; background:inherit; }
+#gate .box { width:100%; max-width:380px; padding:30px 26px; border:1px solid rgba(255,30,86,.4); border-radius:22px; background:var(--card); box-shadow:0 0 50px rgba(255,30,86,.25); }
+.logo-sq { width:46px; height:46px; border-radius:14px; background:linear-gradient(135deg,#ff1e56,#dc2626,#f59e0b); display:flex; align-items:center; justify-content:center; font-size:20px; animation:glow 2.5s infinite; }
+@keyframes glow { 0%,100%{box-shadow:0 0 14px rgba(255,30,86,.35);} 50%{box-shadow:0 0 32px rgba(255,30,86,.8);} }
+
+/* ---------- shell ---------- */
+#shell { display:none; }
+nav.topbar { position:sticky; top:0; z-index:40; background:rgba(7,10,18,.92); border-bottom:1px solid var(--line); padding:11px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px; backdrop-filter:blur(14px); }
+.wrap { max-width:1180px; margin:0 auto; padding:0 14px; }
+.tabs { display:flex; gap:8px; overflow-x:auto; padding:16px 0 10px; scrollbar-width:none; }
+.tabs::-webkit-scrollbar { display:none; }
+.tab { white-space:nowrap; padding:9px 15px; border-radius:11px; font-size:12px; font-weight:700; color:var(--mut); border:1px solid var(--line); background:rgba(255,255,255,.04); transition:all .25s; }
+.tab.on { background:linear-gradient(90deg,#ff1e56,#e11d48); color:#fff; border-color:transparent; box-shadow:0 5px 18px rgba(255,30,86,.45); }
+.view { display:none; padding:6px 0 60px; animation:vin .3s ease; }
+.view.on { display:block; }
+@keyframes vin { from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;} }
+h2.vt { font-size:17px; font-weight:900; margin-bottom:14px; letter-spacing:.02em; }
+
+/* ---------- dashboard ---------- */
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px; }
+.stat { padding:16px; }
+.stat .n { font-size:24px; font-weight:900; margin:6px 0 2px; }
+.stat .l { font-size:10px; font-weight:700; color:var(--mut); text-transform:uppercase; letter-spacing:.07em; }
+.two-col { display:grid; grid-template-columns:1fr; gap:14px; }
+@media(min-width:860px){ .two-col { grid-template-columns:1fr 1fr; } }
+
+/* ---------- orders ---------- */
+.order { padding:16px; margin-bottom:14px; border:1px solid rgba(0,242,254,.28); }
+.order.done { border-color:rgba(52,211,153,.35); }
+.chips { display:flex; flex-wrap:wrap; gap:7px; padding-top:10px; border-top:1px solid var(--line); }
+.chip { padding:7px 11px; border-radius:9px; font-size:10.5px; font-weight:800; border:1px solid var(--line); color:var(--dim); background:rgba(255,255,255,.03); transition:all .2s; }
+.chip:hover { transform:translateY(-2px); }
+.chip.past { background:rgba(0,242,254,.13); border-color:rgba(0,242,254,.55); color:#67e8f9; }
+.chip.now { background:rgba(255,183,3,.14); border-color:rgba(255,183,3,.65); color:#fcd34d; box-shadow:0 0 12px rgba(255,183,3,.3); }
+.etarow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px; }
+.etarow input { width:110px; padding:6px 10px; }
+
+/* ---------- dishes ---------- */
+.dgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px; }
+.dish { overflow:hidden; display:flex; flex-direction:column; }
+.dish img.ph { width:100%; height:120px; object-fit:cover; display:block; background:#0b0f17; }
+.dish .bd { padding:12px 13px; display:flex; flex-direction:column; gap:8px; flex:1; }
+.badge { display:inline-block; font-size:9.5px; font-weight:800; padding:3px 8px; border-radius:7px; background:rgba(255,255,255,.06); border:1px solid var(--line); }
+
+/* ---------- modal ---------- */
+.modal { position:fixed; inset:0; z-index:80; background:rgba(0,0,0,.88); display:none; align-items:flex-start; justify-content:center; padding:20px 14px; overflow-y:auto; }
+.modal.on { display:flex; }
+.modal .mbox { width:100%; max-width:620px; margin:auto; padding:22px; border:1px solid rgba(255,30,86,.4); box-shadow:0 0 50px rgba(255,30,86,.25); }
+.frm { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+.frm .full { grid-column:1/-1; }
+@media(max-width:520px){ .frm { grid-template-columns:1fr; } .frm .full { grid-column:1; } }
+
+/* ---------- misc ---------- */
+.catchip { display:inline-flex; align-items:center; gap:7px; padding:8px 12px; border-radius:11px; font-size:12px; font-weight:700; border:1px solid rgba(255,30,86,.3); background:rgba(255,255,255,.04); }
+.catchip.lock { color:var(--dim); border-color:var(--line); }
+.catchip button { color:#fb7185; font-size:14px; line-height:1; }
+.usercard { padding:15px; }
+.ugrid { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:10px 0; }
+.ugrid .full { grid-column:1/-1; }
+#toast { position:fixed; bottom:20px; right:16px; z-index:99; background:var(--card); border:1px solid rgba(255,30,86,.45); padding:11px 16px; border-radius:12px; font-size:12px; font-weight:700; box-shadow:0 10px 35px rgba(0,0,0,.6); display:none; }
+.empty { padding:26px; text-align:center; color:var(--dim); font-size:12px; font-weight:700; }
+.mono { font-family:Consolas,Menlo,monospace; }
+.amber { color:var(--gold); } .cyan { color:#67e8f9; } .green { color:var(--green); } .red { color:#fb7185; }
+.muted { color:var(--mut); } .small { font-size:10.5px; }
+.row { display:flex; align-items:center; gap:8px; } .between { justify-content:space-between; } .wrap-row { flex-wrap:wrap; }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN GATE ============ -->
+<div id="gate">
+  <div class="box">
+    <div class="row" style="margin-bottom:18px;">
+      <div class="logo-sq">⚙️</div>
+      <div>
+        <div style="font-weight:900; font-size:17px; letter-spacing:.04em;">ADMIN VAULT</div>
+        <div class="small muted" style="text-transform:uppercase; letter-spacing:.12em; font-weight:700;">Command Center Access</div>
+      </div>
+    </div>
+    <label class="lb">Admin Password</label>
+    <input type="password" id="passIn" placeholder="••••••••" autocomplete="current-password">
+    <div id="loginErr" class="red small" style="display:none; margin-top:7px; font-weight:700;">❌ Galat password — dobara try karo</div>
+    <div id="srvErr" class="red small" style="display:none; margin-top:7px; font-weight:700;">⚠️ Server se connect nahi ho pa raha. Check karo ki server chalu hai.</div>
+    <button class="btn-red" style="width:100%; margin-top:14px;" onclick="doLogin()">🔓 Unlock Command Center</button>
+    <div class="small muted" style="text-align:center; margin-top:14px;">Default password: <b style="color:#e2e8f0;">admin123</b></div>
+  </div>
+</div>
+
+<!-- ============ SHELL ============ -->
+<div id="shell">
+  <nav class="topbar">
+    <div class="row">
+      <div class="logo-sq" style="width:38px;height:38px;font-size:16px;">⚙️</div>
+      <div>
+        <div style="font-weight:900; font-size:15px;">CHĪFAN <span style="color:var(--accent);">ADMIN</span></div>
+        <div class="small muted" style="font-size:9px; text-transform:uppercase; letter-spacing:.1em; font-weight:700;">Live Sync • <span id="syncDot" class="green">●</span></div>
+      </div>
+    </div>
+    <div class="row">
+      <a href="/" target="_blank" class="btn-ghost" style="text-decoration:none;">🥢 <span class="hide-sm">User Panel</span></a>
+      <button class="btn-ghost" onclick="refresh(true)">🔄 <span class="hide-sm">Refresh</span></button>
+      <button class="btn-red" style="padding:9px 14px;" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-v="dash" onclick="go('dash')">📊 Dashboard</button>
+      <button class="tab" data-v="orders" onclick="go('orders')">📡 Orders & Track Matrix <span id="obadge" style="display:none; background:var(--accent); color:#fff; font-size:9px; padding:2px 6px; border-radius:99px; margin-left:4px;">0</span></button>
+      <button class="tab" data-v="dishes" onclick="go('dishes')">🍜 Menu Items</button>
+      <button class="tab" data-v="cats" onclick="go('cats')">🏷️ Categories</button>
+      <button class="tab" data-v="banners" onclick="go('banners')">🎯 Banners</button>
+      <button class="tab" data-v="users" onclick="go('users')">👥 Users</button>
+      <button class="tab" data-v="set" onclick="go('set')">🔧 Settings</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <section class="view on" id="v-dash">
+      <div class="stats" id="statBox"></div>
+      <div class="two-col">
+        <div class="card" style="padding:16px;">
+          <h2 class="vt" style="font-size:14px;">⚡ Latest Orders</h2>
+          <div id="dashOrders"></div>
+        </div>
+        <div class="card" style="padding:16px;">
+          <h2 class="vt" style="font-size:14px;">🔥 Menu Snapshot</h2>
+          <div id="dashMenu"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ORDERS -->
+    <section class="view" id="v-orders">
+      <h2 class="vt">📡 Orders & Live Track Matrix Control</h2>
+      <p class="small muted" style="margin-bottom:14px;">Stage chip pe click karo — user ke <b class="cyan">Track Matrix</b> mein turant update dikhega. ETA bhi edit kar sakte ho.</p>
+      <div id="ordersBox"></div>
+    </section>
+
+    <!-- DISHES -->
+    <section class="view" id="v-dishes">
+      <div class="row between" style="margin-bottom:14px;">
+        <h2 class="vt" style="margin:0;">🍜 Menu Items (<span id="dCount">0</span>)</h2>
+        <button class="btn-red" onclick="dishEditor()">＋ Add New Dish</button>
+      </div>
+      <div class="dgrid" id="dishBox"></div>
+    </section>
+
+    <!-- CATEGORIES -->
+    <section class="view" id="v-cats">
+      <h2 class="vt">🏷️ Menu Categories</h2>
+      <div class="card" style="padding:18px; max-width:560px;">
+        <div id="catBox" class="row wrap-row" style="margin-bottom:14px;"></div>
+        <div class="row">
+          <input id="catIn" placeholder="New category (e.g. Sushi, Desserts)" onkeydown="if(event.key==='Enter')addCat()">
+          <button class="btn-red" style="white-space:nowrap;" onclick="addCat()">＋ Add</button>
+        </div>
+        <div class="small muted" style="margin-top:10px;">"All Dishes" fixed rahegi. ❌ se category hatao.</div>
+      </div>
+    </section>
+
+    <!-- BANNERS -->
+    <section class="view" id="v-banners">
+      <div class="row between" style="margin-bottom:14px;">
+        <h2 class="vt" style="margin:0;">🎯 Offer Banners</h2>
+        <button class="btn-red" onclick="addBanner()">＋ Add Banner</button>
+      </div>
+      <div id="bannerBox"></div>
+      <button class="btn-blue" style="margin-top:14px;" onclick="saveBanners()">💾 Save All Banners</button>
+    </section>
+
+    <!-- USERS -->
+    <section class="view" id="v-users">
+      <h2 class="vt">👥 Registered Users (<span id="uCount">0</span>)</h2>
+      <div class="two-col" id="userBox"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" id="v-set">
+      <h2 class="vt">🔧 Store Settings</h2>
+      <div class="card" style="padding:18px; max-width:560px; display:flex; flex-direction:column; gap:13px;">
+        <div><label class="lb">Store Name</label><input id="sName"></div>
+        <div><label class="lb">UPI ID (payments)</label><input id="sUpi"></div>
+        <div><label class="lb">Change Admin Password (blank = no change)</label><input id="sPass" type="password" placeholder="New password"></div>
+        <button class="btn-blue" onclick="saveSettings()">💾 Save Settings</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ============ DISH EDITOR ============ -->
+<div class="modal" id="dModal">
+  <div class="mbox card">
+    <div class="row between" style="margin-bottom:16px;">
+      <h2 class="vt" style="margin:0;" id="dmTitle">Add New Dish</h2>
+      <button class="icon-btn" onclick="closeDish()">✕</button>
+    </div>
+    <input type="hidden" id="fId">
+    <div class="frm">
+      <div class="full"><label class="lb">Dish Name *</label><input id="fName" placeholder="e.g. Dragon Chili Wontons"></div>
+      <div><label class="lb">Category *</label><select id="fCat"></select></div>
+      <div><label class="lb">Price (₹) *</label><input id="fPrice" type="number" placeholder="299"></div>
+      <div><label class="lb">Rating</label><input id="fRating" type="number" step="0.01" value="4.8"></div>
+      <div><label class="lb">Reviews Label</label><input id="fRev" value="New"></div>
+      <div><label class="lb">Spice Label</label><input id="fSpice" value="Mild 🌶️"></div>
+      <div><label class="lb">Cook Style</label><input id="fCook" value="Wok Tossed"></div>
+      <div class="full"><label class="lb">Image URL *</label><input id="fImg" placeholder="https://images.unsplash.com/..." oninput="imgPrev()"></div>
+      <div class="full"><label class="lb">Description</label><textarea id="fDesc" rows="2" placeholder="Short delicious description..."></textarea></div>
+      <div class="full row"><input type="checkbox" id="fVeg" checked style="width:16px;height:16px;accent-color:#10b981;"><label for="fVeg" style="font-size:12px;font-weight:700;">Veg Item 🟢</label></div>
+    </div>
+    <img id="fPrevImg" style="display:none; width:100%; height:130px; object-fit:cover; border-radius:12px; margin-top:11px; border:1px solid var(--line);">
+    <button class="btn-red" style="width:100%; margin-top:16px;" onclick="saveDish()">💾 Save Dish</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ==================== STATE ==================== */
+var TOKEN = sessionStorage.getItem("cf_admin_token") || null;
+var DB = { dishes:[], categories:[], banners:[], users:[], orders:[], settings:{} };
+var pollTimer = null;
+var bannerDraft = [];
+
+var STAGES = ["Received ✅","Cooking 👨‍🍳","En-Route 🏍️","Delivered 🎉"];
+var STAGE_STATUS = {
+  1:"Order Vaulted & Received ✅",
+  2:"Wok Cooking & Thermal Boxed 📦",
+  3:"Cyber Agent En-Route 🏍️",
+  4:"Vault Delivered ✅"
+};
+
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+
+function api(path, method, body){
+  method = method || "GET";
+  var opt = { method:method, headers:{ "Content-Type":"application/json" } };
+  if (TOKEN) opt.headers["x-admin-token"] = TOKEN;
+  if (body) opt.body = JSON.stringify(body);
+  return fetch(path, opt).then(function(r){
+    if (r.status === 401 && path.indexOf("login") === -1) { logout(); throw new Error("auth"); }
+    return r.json();
+  });
+}
+
+function toast(msg){
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  clearTimeout(t._tm);
+  t._tm = setTimeout(function(){ t.style.display = "none"; }, 2300);
+}
+
+/* ==================== AUTH ==================== */
+function doLogin(){
+  document.getElementById("loginErr").style.display = "none";
+  document.getElementById("srvErr").style.display = "none";
+  api("/api/admin/login","POST",{ password: document.getElementById("passIn").value })
+    .then(function(r){
+      if (r.token){ TOKEN = r.token; sessionStorage.setItem("cf_admin_token", TOKEN); enter(); }
+      else document.getElementById("loginErr").style.display = "block";
+    })
+    .catch(function(){ document.getElementById("srvErr").style.display = "block"; });
+}
+document.getElementById("passIn").addEventListener("keydown", function(e){ if (e.key === "Enter") doLogin(); });
+
+function logout(){
+  TOKEN = null;
+  sessionStorage.removeItem("cf_admin_token");
+  clearInterval(pollTimer);
+  document.getElementById("shell").style.display = "none";
+  document.getElementById("gate").style.display = "flex";
+}
+
+function enter(){
+  document.getElementById("gate").style.display = "none";
+  document.getElementById("shell").style.display = "block";
+  refresh(false);
+  clearInterval(pollTimer);
+  pollTimer = setInterval(function(){ refresh(false); }, 5000);
+}
+
+/* ==================== DATA ==================== */
+function refresh(showMsg){
+  return api("/api/admin/db").then(function(r){
+    if (!r.db) return;
+    DB = r.db;
+    document.getElementById("syncDot").textContent = "● online";
+    renderAll();
+    if (showMsg) toast("Data refreshed 🔄");
+  }).catch(function(){
+    document.getElementById("syncDot").textContent = "● offline";
+  });
+}
+
+function renderAll(){
+  rDash(); rOrders(); rDishes(); rCats(); rUsers(); rSettings();
+  if (!document.getElementById("v-banners").classList.contains("on")) rBanners();
+  var act = DB.orders.filter(function(o){ return (o.stage||1) < 4; }).length;
+  var b = document.getElementById("obadge");
+  b.textContent = act;
+  b.style.display = act ? "inline-block" : "none";
+}
+
+/* ==================== TABS ==================== */
+function go(v){
+  var vs = document.querySelectorAll(".view"), ts = document.querySelectorAll(".tab"), i;
+  for (i=0;i<vs.length;i++) vs[i].classList.remove("on");
+  for (i=0;i<ts.length;i++) ts[i].classList.remove("on");
+  document.getElementById("v-"+v).classList.add("on");
+  document.querySelector('.tab[data-v="'+v+'"]').classList.add("on");
+  if (v === "banners") rBanners();
+}
+
+/* ==================== DASHBOARD ==================== */
+function rDash(){
+  var rev = DB.orders.reduce(function(s,o){ return s + (o.total||0); }, 0);
+  var act = DB.orders.filter(function(o){ return (o.stage||1) < 4; }).length;
+  var st = [
+    ["🛍️","Total Orders", DB.orders.length, "amber"],
+    ["📡","Active Orders", act, "cyan"],
+    ["₹","Revenue", "₹"+rev, "green"],
+    ["👥","Users", DB.users.length, "red"]
+  ];
+  document.getElementById("statBox").innerHTML = st.map(function(s){
+    return '<div class="card stat"><div style="font-size:18px;">'+s[0]+'</div><div class="n '+s[3]+'">'+s[2]+'</div><div class="l">'+s[1]+'</div></div>';
+  }).join("");
+
+  document.getElementById("dashOrders").innerHTML = DB.orders.length === 0
+    ? '<div class="empty">Abhi tak koi order nahi.</div>'
+    : DB.orders.slice(0,5).map(function(o){
+        var stg = o.stage||1;
+        return '<div class="pill row between" style="padding:10px 12px; margin-bottom:8px; font-size:12px;">'
+          + '<span><b class="mono">#'+esc(o.id)+'</b> <span class="muted">'+esc(o.name||"Guest")+'</span></span>'
+          + '<span class="row"><b class="amber">₹'+o.total+'</b><span class="badge '+(stg===4?"green":"cyan")+'">'+STAGES[stg-1]+'</span></span></div>';
+      }).join("");
+
+  var maxP = 0; DB.dishes.forEach(function(d){ if (d.price > maxP) maxP = d.price; });
+  document.getElementById("dashMenu").innerHTML =
+    ['<span>Total Dishes</span><b>'+DB.dishes.length+'</b>',
+     '<span>Categories</span><b>'+Math.max(0,DB.categories.length-1)+'</b>',
+     '<span>Active Banners</span><b>'+DB.banners.length+'</b>',
+     '<span>Costliest Dish</span><b class="amber">₹'+maxP+'</b>'
+    ].map(function(x){ return '<div class="pill row between" style="padding:10px 12px; margin-bottom:8px; font-size:12px;">'+x+'</div>'; }).join("");
+}
+
+/* ==================== ORDERS ==================== */
+function rOrders(){
+  var box = document.getElementById("ordersBox");
+  if (DB.orders.length === 0){
+    box.innerHTML = '<div class="card empty">Koi order nahi. User panel se order aate hi yahan dikhega (5 sec auto-sync) 🥢</div>';
+    return;
+  }
+  box.innerHTML = DB.orders.map(function(o){
+    var stg = o.stage||1;
+    var chips = STAGES.map(function(s,i){
+      var n = i+1, cls = n < stg ? "past" : n === stg ? "now" : "";
+      return '<button class="chip '+cls+'" onclick="setStage(\''+esc(o.id)+'\','+n+')">'+n+'. '+s+'</button>';
+    }).join("");
+    var items = (o.items||[]).map(function(i){ return esc(i.name)+" (x"+i.qty+")"; }).join(", ");
+    return '<div class="card order'+(stg===4?" done":"")+'">'
+      + '<div class="row between wrap-row" style="margin-bottom:8px;">'
+      +   '<span class="row"><b class="mono">#'+esc(o.id)+'</b><span class="small muted">'+esc(o.date||"")+'</span><span class="badge">'+esc(o.method||"COD")+'</span></span>'
+      +   '<span class="row"><b class="amber" style="font-size:15px;">₹'+o.total+'</b>'
+      +   '<button class="icon-btn danger" onclick="delOrder(\''+esc(o.id)+'\')">🗑️</button></span></div>'
+      + '<div style="font-size:12px; margin-bottom:5px;">'+items+'</div>'
+      + '<div class="small muted" style="margin-bottom:10px;">👤 '+esc(o.name||"Guest")+' • 📞 '+esc(o.phone||"—")+' • 📍 '+esc(o.address||"—")+(o.landmark?", near "+esc(o.landmark):"")+'</div>'
+      + '<div class="chips">'+chips+'</div>'
+      + '<div class="etarow"><label class="lb" style="margin:0;">ETA:</label>'
+      +   '<input id="eta-'+esc(o.id)+'" value="'+esc(o.eta||"")+'">'
+      +   '<button class="btn-ghost" style="color:#67e8f9; border-color:rgba(0,242,254,.4);" onclick="saveEta(\''+esc(o.id)+'\')">Update ETA</button>'
+      +   '<span class="small muted" style="margin-left:auto;">Status: <b class="amber">'+esc(o.status||"")+'</b></span></div>'
+      + '</div>';
+  }).join("");
+}
+function setStage(id, stage){
+  api("/api/admin/orders/"+encodeURIComponent(id),"PUT",{ stage:stage, status:STAGE_STATUS[stage] })
+    .then(function(r){ if (r.ok){ toast("Order #"+id+" → Stage "+stage+" ✅"); refresh(false); } });
+}
+function saveEta(id){
+  var eta = document.getElementById("eta-"+id).value.trim();
+  api("/api/admin/orders/"+encodeURIComponent(id),"PUT",{ eta:eta })
+    .then(function(r){ if (r.ok){ toast("ETA updated ⏱️"); refresh(false); } });
+}
+function delOrder(id){
+  if (!confirm("Order #"+id+" delete karein?")) return;
+  api("/api/admin/orders/"+encodeURIComponent(id),"DELETE")
+    .then(function(r){ if (r.ok){ toast("Order deleted 🗑️"); refresh(false); } });
+}
+
+/* ==================== DISHES ==================== */
+function rDishes(){
+  document.getElementById("dCount").textContent = DB.dishes.length;
+  document.getElementById("dishBox").innerHTML = DB.dishes.map(function(d){
+    return '<div class="card dish">'
+      + '<img class="ph" src="'+esc(d.image)+'" onerror="this.style.opacity=.25" alt="">'
+      + '<div class="bd">'
+      +   '<div class="row between"><span class="badge">'+esc(d.category)+'</span><span class="badge amber">⭐ '+d.rating+'</span></div>'
+      +   '<div style="font-weight:800; font-size:13px;">'+esc(d.name)+'</div>'
+      +   '<div class="small muted" style="min-height:26px; overflow:hidden;">'+esc((d.desc||"").slice(0,80))+'</div>'
+      +   '<div class="row between" style="margin-top:auto; padding-top:8px; border-top:1px solid var(--line);">'
+      +     '<b class="amber" style="font-size:14px;">₹'+d.price+'</b>'
+      +     '<span class="row"><button class="icon-btn" onclick="dishEditor('+d.id+')">✏️</button>'
+      +     '<button class="icon-btn danger" onclick="delDish('+d.id+')">🗑️</button></span></div>'
+      + '</div></div>';
+  }).join("");
+}
+function dishEditor(id){
+  var sel = document.getElementById("fCat");
+  sel.innerHTML = DB.categories.filter(function(c){ return c !== "All Dishes"; })
+    .map(function(c){ return '<option>'+esc(c)+'</option>'; }).join("");
+  var d = id ? DB.dishes.filter(function(x){ return x.id === id; })[0] : null;
+  document.getElementById("dmTitle").textContent = d ? "Edit Dish — "+d.name : "Add New Dish";
+  document.getElementById("fId").value = d ? d.id : "";
+  document.getElementById("fName").value = d ? d.name : "";
+  if (d) sel.value = d.category;
+  document.getElementById("fPrice").value = d ? d.price : "";
+  document.getElementById("fRating").value = d ? d.rating : "4.8";
+  document.getElementById("fRev").value = d ? d.reviews : "New";
+  document.getElementById("fSpice").value = d ? d.spice : "Mild 🌶️";
+  document.getElementById("fCook").value = d ? d.cook : "Wok Tossed";
+  document.getElementById("fImg").value = d ? d.image : "";
+  document.getElementById("fDesc").value = d ? (d.desc||"") : "";
+  document.getElementById("fVeg").checked = d ? !!d.veg : true;
+  imgPrev();
+  document.getElementById("dModal").classList.add("on");
+}
+function imgPrev(){
+  var u = document.getElementById("fImg").value.trim();
+  var img = document.getElementById("fPrevImg");
+  if (u){ img.src = u; img.style.display = "block"; } else img.style.display = "none";
+}
+function closeDish(){ document.getElementById("dModal").classList.remove("on"); }
+function saveDish(){
+  var id = document.getElementById("fId").value;
+  var body = {
+    name: document.getElementById("fName").value.trim(),
+    category: document.getElementById("fCat").value,
+    price: Number(document.getElementById("fPrice").value),
+    rating: Number(document.getElementById("fRating").value),
+    reviews: document.getElementById("fRev").value.trim(),
+    spice: document.getElementById("fSpice").value.trim(),
+    cook: document.getElementById("fCook").value.trim(),
+    image: document.getElementById("fImg").value.trim(),
+    desc: document.getElementById("fDesc").value.trim(),
+    veg: document.getElementById("fVeg").checked
+  };
+  if (!body.name || !body.price || !body.image) return toast("⚠️ Name, Price & Image URL required!");
+  var pr = id ? api("/api/admin/dishes/"+id,"PUT",body) : api("/api/admin/dishes","POST",body);
+  pr.then(function(r){
+    if (r.ok){ toast(id ? "Dish updated ✅" : "Dish added — user panel me live ✅"); closeDish(); refresh(false); }
+  });
+}
+function delDish(id){
+  var d = DB.dishes.filter(function(x){ return x.id === id; })[0];
+  if (!confirm('"'+(d?d.name:id)+'" delete karein?')) return;
+  api("/api/admin/dishes/"+id,"DELETE").then(function(r){ if (r.ok){ toast("Dish deleted 🗑️"); refresh(false); } });
+}
+
+/* ==================== CATEGORIES ==================== */
+function rCats(){
+  document.getElementById("catBox").innerHTML = DB.categories.map(function(c){
+    return c === "All Dishes"
+      ? '<span class="catchip lock">'+esc(c)+' 🔒</span>'
+      : '<span class="catchip">'+esc(c)+'<button onclick="delCat(\''+esc(c).replace(/'/g,"\\'")+'\')">✕</button></span>';
+  }).join("");
+}
+function addCat(){
+  var inp = document.getElementById("catIn"), name = inp.value.trim();
+  if (!name) return;
+  api("/api/admin/categories","PUT",{ categories: DB.categories.concat([name]) })
+    .then(function(r){ if (r.ok){ inp.value = ""; toast('Category "'+name+'" added ✅'); refresh(false); } });
+}
+function delCat(name){
+  var used = DB.dishes.filter(function(d){ return d.category === name; }).length;
+  if (used > 0 && !confirm(used+" dishes is category me hain. Phir bhi remove karein?")) return;
+  api("/api/admin/categories","PUT",{ categories: DB.categories.filter(function(c){ return c !== name; }) })
+    .then(function(r){ if (r.ok){ toast("Category removed 🗑️"); refresh(false); } });
+}
+
+/* ==================== BANNERS ==================== */
+var BCOLORS = ["from-red-600 to-rose-700","from-amber-600 to-red-600","from-cyan-600 to-blue-700","from-emerald-600 to-teal-700","from-fuchsia-600 to-purple-700"];
+function rBanners(){
+  bannerDraft = JSON.parse(JSON.stringify(DB.banners));
+  drawBanners();
+}
+function drawBanners(){
+  document.getElementById("bannerBox").innerHTML = bannerDraft.length === 0
+    ? '<div class="card empty">Koi banner nahi — "Add Banner" dabao.</div>'
+    : bannerDraft.map(function(b,i){
+      return '<div class="card" style="padding:16px; margin-bottom:13px;">'
+        + '<div class="row between" style="margin-bottom:11px;"><b style="font-size:13px;">Banner '+(i+1)+'</b>'
+        + '<button class="icon-btn danger" onclick="rmBanner('+i+')">🗑️</button></div>'
+        + '<div class="frm">'
+        + '<div><label class="lb">Tag (badge)</label><input value="'+esc(b.tag)+'" oninput="bannerDraft['+i+'].tag=this.value"></div>'
+        + '<div><label class="lb">CTA Button Text</label><input value="'+esc(b.cta)+'" oninput="bannerDraft['+i+'].cta=this.value"></div>'
+        + '<div class="full"><label class="lb">Title</label><input value="'+esc(b.title)+'" oninput="bannerDraft['+i+'].title=this.value"></div>'
+        + '<div class="full"><label class="lb">Description</label><input value="'+esc(b.desc)+'" oninput="bannerDraft['+i+'].desc=this.value"></div>'
+        + '<div class="full"><label class="lb">Image URL</label><input value="'+esc(b.img)+'" oninput="bannerDraft['+i+'].img=this.value"></div>'
+        + '<div><label class="lb">Gradient Color</label><select onchange="bannerDraft['+i+'].color=this.value">'
+        +   BCOLORS.map(function(c){ return '<option'+(b.color===c?" selected":"")+'>'+c+'</option>'; }).join("")
+        + '</select></div>'
+        + (b.img ? '<div style="display:flex;align-items:flex-end;"><img src="'+esc(b.img)+'" style="height:56px;width:92px;object-fit:cover;border-radius:10px;border:1px solid var(--line);"></div>' : '')
+        + '</div></div>';
+    }).join("");
+}
+function addBanner(){
+  bannerDraft.push({ tag:"🔥 NEW OFFER", title:"New Offer Title", desc:"Offer description here.", cta:"Explore", img:"", color:BCOLORS[0] });
+  drawBanners();
+}
+function rmBanner(i){ bannerDraft.splice(i,1); drawBanners(); }
+function saveBanners(){
+  api("/api/admin/banners","PUT",{ banners: bannerDraft })
+    .then(function(r){ if (r.ok){ toast("Banners saved — user panel me live ✅"); refresh(false); } });
+}
+
+/* ==================== USERS ==================== */
+function rUsers(){
+  document.getElementById("uCount").textContent = DB.users.length;
+  document.getElementById("userBox").innerHTML = DB.users.length === 0
+    ? '<div class="card empty" style="grid-column:1/-1;">Abhi koi registered user nahi. User panel pe login/signup hote hi yahan dikhega.</div>'
+    : DB.users.map(function(u){
+      return '<div class="card usercard">'
+        + '<div class="row between">'
+        +   '<div class="row"><div class="logo-sq" style="width:38px;height:38px;font-size:15px;animation:none;">'+esc((u.name||"?").charAt(0).toUpperCase())+'</div>'
+        +   '<div><div style="font-weight:800;font-size:13px;">'+esc(u.name||"Operative")+'</div><div class="small muted mono">'+esc(u.id)+'</div></div></div>'
+        +   '<button class="icon-btn danger" onclick="delUser(\''+esc(u.id)+'\')">🗑️</button></div>'
+        + '<div class="ugrid">'
+        +   '<div class="full"><label class="lb">Name</label><input id="un-'+esc(u.id)+'" value="'+esc(u.name)+'"></div>'
+        +   '<div><label class="lb">Phone</label><input id="up-'+esc(u.id)+'" value="'+esc(u.phone)+'"></div>'
+        +   '<div><label class="lb">Email</label><input id="ue-'+esc(u.id)+'" value="'+esc(u.email)+'"></div>'
+        +   '<div class="full"><label class="lb">Address</label><input id="ua-'+esc(u.id)+'" value="'+esc(u.address)+'"></div>'
+        + '</div>'
+        + '<button class="btn-blue" style="width:100%;" onclick="saveUser(\''+esc(u.id)+'\')">💾 Save User</button>'
+        + '</div>';
+    }).join("");
+}
+function saveUser(id){
+  api("/api/admin/users/"+id,"PUT",{
+    name: document.getElementById("un-"+id).value.trim(),
+    phone: document.getElementById("up-"+id).value.trim(),
+    email: document.getElementById("ue-"+id).value.trim(),
+    address: document.getElementById("ua-"+id).value.trim()
+  }).then(function(r){ if (r.ok){ toast("User updated ✅"); refresh(false); } });
+}
+function delUser(id){
+  if (!confirm("User delete karein?")) return;
+  api("/api/admin/users/"+id,"DELETE").then(function(r){ if (r.ok){ toast("User deleted 🗑️"); refresh(false); } });
+}
+
+/* ==================== SETTINGS ==================== */
+function rSettings(){
+  var a = document.activeElement;
+  if (a && (a.id === "sName" || a.id === "sUpi" || a.id === "sPass")) return;
+  document.getElementById("sName").value = DB.settings.storeName || "";
+  document.getElementById("sUpi").value = DB.settings.upiId || "";
+}
+function saveSettings(){
+  var body = {
+    storeName: document.getElementById("sName").value.trim(),
+    upiId: document.getElementById("sUpi").value.trim()
+  };
+  var p = document.getElementById("sPass").value.trim();
+  if (p) body.adminPassword = p;
+  api("/api/admin/settings","PUT",body).then(function(r){
+    if (r.ok){ document.getElementById("sPass").value = ""; toast("Settings saved ✅"); refresh(false); }
+  });
+}
+
+/* ==================== INIT ==================== */
+if (TOKEN){
+  api("/api/admin/db").then(function(r){ if (r.db) enter(); else logout(); }).catch(function(){ logout(); });
+}
+</script>
+</body>
+</html>
