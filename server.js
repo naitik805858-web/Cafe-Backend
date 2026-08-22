@@ -16,7 +16,7 @@ const DB_FILE = path.join(DATA_DIR, "db.json");
 /* ---------------- Database ---------------- */
 const DEFAULT_DB = {
   settings: {
-    adminPassword: "admin123",
+    adminPassword: "Naitik80",
     storeName: "CHĪFAN PRIME",
     upiId: "chifanprime@upi"
   },
