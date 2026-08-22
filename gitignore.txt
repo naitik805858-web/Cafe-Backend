@@ -1,0 +1,51 @@
+# ==================== CHĪFAN PRIME — .gitignore ====================
+
+# Database — runtime data (orders, users, admin password isme save hota hai)
+# Git me commit mat karo — har environment apna fresh db.json bana lega
+data/
+*.db
+*.sqlite
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.npm/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build / temp
+dist/
+build/
+out/
+tmp/
+temp/
+*.tmp
+
+# Uploads (agar user-uploaded files rakhni ho to yeh line hata dena)
+uploads/

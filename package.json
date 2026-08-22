@@ -1,0 +1,24 @@
+{
+  "name": "chifan-prime",
+  "version": "1.0.0",
+  "description": "CHĪFAN PRIME 🥢 — Cyber Culinary Vault. Food ordering website (user panel) + Admin Command Center with live order tracking (Track Matrix), menu/category/banner management and user management. Zero external npm dependencies.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "admin": "node admin-proxy.js",
+    "dev": "node start-all.js"
+  },
+  "keywords": [
+    "food-ordering",
+    "restaurant",
+    "admin-panel",
+    "order-tracking",
+    "nodejs",
+    "zero-dependency"
+  ],
+  "author": "CHIFAN PRIME",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
